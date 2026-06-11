@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 use touchforge_profile::{
+    export_json,
     load_icp,
     load_profile,
     save_profile,
@@ -28,6 +29,11 @@ enum Commands {
 
     OpenProfile {
         file: String,
+    },
+
+    Export {
+        input: String,
+        output: String,
     },
 }
 
@@ -59,6 +65,14 @@ fn main() -> Result<()> {
             println!("Profile: {}", profile.name);
             println!("Version: {}", profile.version);
             println!("Elements: {}", profile.elements.len());
+        }
+
+        Commands::Export { input, output } => {
+            let profile = load_profile(&input)?;
+
+            export_json(&profile, &output)?;
+
+            println!("Exported {} -> {}", input, output);
         }
     }
 
