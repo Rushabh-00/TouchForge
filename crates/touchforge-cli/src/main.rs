@@ -30,12 +30,8 @@ fn main() -> Result<()> {
             println!();
 
             for element in profile.elements {
-                println!(
-                    "{} ({}, {})",
-                    element.element_type,
-                    element.x,
-                    element.y
-                );
+    println!("{} ({}, {})", element.element_type, element.x, element.y);
+}
             }
         }
     }
