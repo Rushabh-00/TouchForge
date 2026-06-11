@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
+
 use touchforge_profile::load_icp;
 
 #[derive(Parser)]
@@ -22,16 +23,19 @@ fn main() -> Result<()> {
         Commands::Import { file } => {
             let profile = load_icp(&file)?;
 
-    println!("Profile: {}", profile.name);
+            println!("Profile: {}", profile.name);
+            println!("Cursor Speed: {}", profile.cursor_speed);
+            println!("Elements: {}", profile.elements.len());
 
-for element in profile.elements {
-    println!(
-        "{} ({}, {})",
-        element.element_type,
-        element.x,
-        element.y
-    );
-}
+            println!();
+
+            for element in profile.elements {
+                println!(
+                    "{} ({}, {})",
+                    element.element_type,
+                    element.x,
+                    element.y
+                );
             }
         }
     }
