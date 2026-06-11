@@ -1,6 +1,7 @@
 pub mod converter;
 pub mod model;
 pub mod touchforge;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -48,6 +49,25 @@ pub fn load_icp<P: AsRef<Path>>(path: P) -> Result<IcpProfile> {
     let profile: IcpProfile = serde_json::from_str(&text)?;
     Ok(profile)
 }
-pub use touchforge::*;
-pub use model::*;
+
+pub fn save_icp<P: AsRef<Path>>(
+    profile: &IcpProfile,
+    path: P,
+) -> Result<()> {
+    let json = serde_json::to_string_pretty(profile)?;
+    fs::write(path, json)?;
+    Ok(())
+}
+
+pub fn export_json<P: AsRef<Path>>(
+    profile: &TfProfile,
+    path: P,
+) -> Result<()> {
+    let json = serde_json::to_string_pretty(profile)?;
+    fs::write(path, json)?;
+    Ok(())
+}
+
 pub use converter::*;
+pub use model::*;
+pub use touchforge::*;
