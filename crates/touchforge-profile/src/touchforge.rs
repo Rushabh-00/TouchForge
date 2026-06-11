@@ -13,6 +13,7 @@ pub struct TfProfile {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TfElement {
     pub id: String,
+
     pub element_type: ElementType,
 
     pub x: f32,
@@ -22,6 +23,14 @@ pub struct TfElement {
     pub height: f32,
 
     pub opacity: f32,
+
+    pub bindings: Vec<String>,
+
+    pub icon_id: Option<i32>,
+
+    pub toggle_switch: bool,
+
+    pub label: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -30,6 +39,9 @@ pub enum ElementType {
     Joystick,
     SwipeArea,
     MouseArea,
+    RangeButton,
+    DPad,
+    Trigger,
 }
 
 pub fn save_profile<P: AsRef<Path>>(
@@ -53,7 +65,7 @@ impl TfProfile {
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             name: name.into(),
-            version: 1,
+            version: 2,
             elements: Vec::new(),
         }
     }
@@ -74,11 +86,22 @@ impl TfElement {
         Self {
             id: id.into(),
             element_type: ElementType::Button,
+
             x,
             y,
+
             width,
             height,
+
             opacity: 1.0,
+
+            bindings: Vec::new(),
+
+            icon_id: None,
+
+            toggle_switch: false,
+
+            label: None,
         }
     }
 
@@ -92,11 +115,51 @@ impl TfElement {
         Self {
             id: id.into(),
             element_type: ElementType::Joystick,
+
             x,
             y,
+
             width,
             height,
+
             opacity: 1.0,
+
+            bindings: Vec::new(),
+
+            icon_id: None,
+
+            toggle_switch: false,
+
+            label: None,
+        }
+    }
+
+    pub fn trigger(
+        id: impl Into<String>,
+        x: f32,
+        y: f32,
+        width: f32,
+        height: f32,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            element_type: ElementType::Trigger,
+
+            x,
+            y,
+
+            width,
+            height,
+
+            opacity: 1.0,
+
+            bindings: Vec::new(),
+
+            icon_id: None,
+
+            toggle_switch: false,
+
+            label: None,
         }
     }
 }
