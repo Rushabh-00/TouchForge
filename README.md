@@ -3,6 +3,7 @@
 TouchForge is an open-source, cross-platform touch control overlay and input mapping system inspired by Winlator-style on-screen controls.
 
 [![build](https://github.com/Rushabh-00/TouchForge/actions/workflows/build.yml/badge.svg)](https://github.com/Rushabh-00/TouchForge/actions/workflows/build.yml)
+[![release](https://github.com/Rushabh-00/TouchForge/actions/workflows/release.yml/badge.svg)](https://github.com/Rushabh-00/TouchForge/actions/workflows/release.yml)
 ## Goals
 - Import touch control profiles
 - Render floating on-screen controls
