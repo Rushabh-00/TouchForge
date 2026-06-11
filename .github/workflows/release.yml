@@ -6,6 +6,11 @@ on:
       - "v*"
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag"
+        required: true
+        default: "v0.1.0"
 
 permissions:
   contents: write
@@ -13,6 +18,8 @@ permissions:
 jobs:
   release:
     strategy:
+      fail-fast: false
+
       matrix:
         include:
           - os: windows-latest
@@ -60,17 +67,22 @@ jobs:
           cp target/${{ matrix.target }}/release/touchforge-cli dist/
           tar -czf ${{ matrix.archive }} dist
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.archive }}
-          path: ${{ matrix.archive }}
+      - name: Determine Tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "value=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Upload Release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.tag.outputs.value }}
           files: ${{ matrix.archive }}
           overwrite_files: true
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
