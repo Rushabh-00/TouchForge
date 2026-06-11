@@ -1,39 +1,38 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::Path;
-use thiserror::Error;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Profile {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IcpProfile {
+    pub id: i32,
     pub name: String,
-    pub controls: Vec<Control>,
+
+    #[serde(rename = "cursorSpeed")]
+    pub cursor_speed: f32,
+
+    pub elements: Vec<IcpElement>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Control {
-    pub control_type: String,
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IcpElement {
+    #[serde(rename = "type")]
+    pub element_type: String,
+
+    pub shape: String,
+
+    pub bindings: Vec<String>,
+
+    pub scale: f32,
+
     pub x: f32,
     pub y: f32,
-    pub scale: f32,
-    pub binding: String,
-}
 
-#[derive(Debug, Error)]
-pub enum ProfileError {
-    #[error("failed to read profile file: {0}")]
-    Io(#[from] std::io::Error),
+    #[serde(rename = "toggleSwitch")]
+    pub toggle_switch: bool,
 
-    #[error("failed to parse profile JSON: {0}")]
-    Json(#[from] serde_json::Error),
-}
+    pub text: String,
 
-pub fn load_profile<P: AsRef<Path>>(path: P) -> Result<Profile, ProfileError> {
-    let text = fs::read_to_string(path)?;
-    let profile: Profile = serde_json::from_str(&text)?;
-    Ok(profile)
-}
+    #[serde(rename = "iconId")]
+    pub icon_id: i32,
 
-pub fn load_profile_text<P: AsRef<Path>>(path: P) -> Result<String, ProfileError> {
-    let text = fs::read_to_string(path)?;
-    Ok(text)
+    #[serde(default)]
+    pub range: Option<String>,
 }
