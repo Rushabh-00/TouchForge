@@ -15,11 +15,15 @@ pub fn tfp_to_internal(profile: &TfProfile) -> InternalProfile {
             .map(|e| InternalElement {
                 id: e.id.clone(),
                 element_type: match e.element_type {
-                    crate::ElementType::Button => InternalElementType::Button,
-                    crate::ElementType::Joystick => InternalElementType::Joystick,
-                    crate::ElementType::SwipeArea => InternalElementType::SwipeArea,
-                    crate::ElementType::MouseArea => InternalElementType::MouseArea,
-                },
+    crate::ElementType::Button => InternalElementType::Button,
+    crate::ElementType::Joystick => InternalElementType::Joystick,
+    crate::ElementType::SwipeArea => InternalElementType::SwipeArea,
+    crate::ElementType::MouseArea => InternalElementType::MouseArea,
+
+    crate::ElementType::RangeButton => InternalElementType::Button,
+    crate::ElementType::DPad => InternalElementType::Button,
+    crate::ElementType::Trigger => InternalElementType::Button,
+},
                 x: e.x,
                 y: e.y,
                 width: e.width,
