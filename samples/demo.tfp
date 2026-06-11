@@ -1,5 +1,19 @@
 {
   "name": "Demo",
-  "version": 1,
-  "elements": []
+  "version": 2,
+  "elements": [
+    {
+      "id": "jump",
+      "element_type": "Button",
+      "x": 1500,
+      "y": 700,
+      "width": 120,
+      "height": 120,
+      "opacity": 0.8,
+      "bindings": ["KEY_SPACE"],
+      "icon_id": null,
+      "toggle_switch": false,
+      "label": "Jump"
+    }
+  ]
 }
