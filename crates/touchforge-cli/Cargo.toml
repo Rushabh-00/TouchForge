@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+
 touchforge-profile = { path = "../touchforge-profile" }
