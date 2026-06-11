@@ -1,7 +1,12 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
-use touchforge_profile::load_icp;
+use touchforge_profile::{
+    load_icp,
+    load_profile,
+    save_profile,
+    TfProfile,
+};
 
 #[derive(Parser)]
 #[command(name = "touchforge")]
@@ -13,7 +18,17 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Import { file: String },
+    Import {
+        file: String,
+    },
+
+    CreateProfile {
+        name: String,
+    },
+
+    OpenProfile {
+        file: String,
+    },
 }
 
 fn main() -> Result<()> {
@@ -26,17 +41,24 @@ fn main() -> Result<()> {
             println!("Profile: {}", profile.name);
             println!("Cursor Speed: {}", profile.cursor_speed);
             println!("Elements: {}", profile.elements.len());
+        }
 
-            println!();
+        Commands::CreateProfile { name } => {
+            let profile = TfProfile::new(name.clone());
 
-            for element in profile.elements {
-                println!(
-                    "{} ({}, {})",
-                    element.element_type,
-                    element.x,
-                    element.y
-                );
-            }
+            let filename = format!("{}.tfp", name);
+
+            save_profile(&profile, &filename)?;
+
+            println!("Created {}", filename);
+        }
+
+        Commands::OpenProfile { file } => {
+            let profile = load_profile(&file)?;
+
+            println!("Profile: {}", profile.name);
+            println!("Version: {}", profile.version);
+            println!("Elements: {}", profile.elements.len());
         }
     }
 
