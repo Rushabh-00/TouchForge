@@ -43,6 +43,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
+
           Copy-Item target/${{ matrix.target }}/release/touchforge-cli.exe dist/
 
           Compress-Archive `
