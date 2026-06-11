@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use touchforge_profile::load_profile;
+use touchforge_profile::load_icp;
 
 #[derive(Parser)]
 #[command(name = "touchforge")]
@@ -20,16 +20,18 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::Import { file } => {
-            let profile = load_profile(&file)?;
+            let profile = load_icp(&file)?;
 
-            println!("Profile: {}", profile.name);
-            println!("Controls: {}", profile.controls.len());
+    println!("Profile: {}", profile.name);
 
-            for control in profile.controls {
-                println!(
-                    "- {} at ({}, {}) scale {} -> {}",
-                    control.control_type, control.x, control.y, control.scale, control.binding
-                );
+for element in profile.elements {
+    println!(
+        "{} ({}, {})",
+        element.element_type,
+        element.x,
+        element.y
+    );
+}
             }
         }
     }
