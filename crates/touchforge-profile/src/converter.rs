@@ -1,0 +1,37 @@
+use crate::{
+    IcpProfile,
+    InternalElement,
+    InternalElementType,
+    InternalProfile,
+    TfProfile,
+};
+
+pub fn tfp_to_internal(profile: &TfProfile) -> InternalProfile {
+    InternalProfile {
+        name: profile.name.clone(),
+        elements: profile
+            .elements
+            .iter()
+            .map(|e| InternalElement {
+                id: e.id.clone(),
+                element_type: match e.element_type {
+                    crate::ElementType::Button => InternalElementType::Button,
+                    crate::ElementType::Joystick => InternalElementType::Joystick,
+                    crate::ElementType::SwipeArea => InternalElementType::SwipeArea,
+                    crate::ElementType::MouseArea => InternalElementType::MouseArea,
+                },
+                x: e.x,
+                y: e.y,
+                width: e.width,
+                height: e.height,
+            })
+            .collect(),
+    }
+}
+
+pub fn icp_to_internal(profile: &IcpProfile) -> InternalProfile {
+    InternalProfile {
+        name: profile.name.clone(),
+        elements: Vec::new(),
+    }
+}
