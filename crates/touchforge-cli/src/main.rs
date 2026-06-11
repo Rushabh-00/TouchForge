@@ -12,9 +12,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Import {
-        file: String,
-    },
+    Import { file: String },
 }
 
 fn main() -> Result<()> {
