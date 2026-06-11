@@ -1,3 +1,4 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
@@ -34,7 +35,7 @@ pub enum ElementType {
 pub fn save_profile<P: AsRef<Path>>(
     profile: &TfProfile,
     path: P,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<()> {
     let json = serde_json::to_string_pretty(profile)?;
     fs::write(path, json)?;
     Ok(())
@@ -42,7 +43,7 @@ pub fn save_profile<P: AsRef<Path>>(
 
 pub fn load_profile<P: AsRef<Path>>(
     path: P,
-) -> Result<TfProfile, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<TfProfile> {
     let text = fs::read_to_string(path)?;
     let profile: TfProfile = serde_json::from_str(&text)?;
     Ok(profile)
