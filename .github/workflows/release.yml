@@ -60,9 +60,15 @@ jobs:
           cp target/${{ matrix.target }}/release/touchforge-cli dist/
           tar -czf ${{ matrix.archive }} dist
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive }}
+          path: ${{ matrix.archive }}
+
       - name: Upload Release
-        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
         with:
           files: ${{ matrix.archive }}
           overwrite_files: true
