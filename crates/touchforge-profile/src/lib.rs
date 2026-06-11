@@ -1,3 +1,4 @@
+pub mod touchforge;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -45,3 +46,4 @@ pub fn load_icp<P: AsRef<Path>>(path: P) -> Result<IcpProfile> {
     let profile: IcpProfile = serde_json::from_str(&text)?;
     Ok(profile)
 }
+pub use touchforge::*;
