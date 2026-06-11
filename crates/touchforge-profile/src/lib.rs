@@ -1,3 +1,4 @@
+pub mod model;
 pub mod touchforge;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -47,3 +48,4 @@ pub fn load_icp<P: AsRef<Path>>(path: P) -> Result<IcpProfile> {
     Ok(profile)
 }
 pub use touchforge::*;
+pub use model::*;
