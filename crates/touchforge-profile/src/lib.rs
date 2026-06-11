@@ -1,3 +1,4 @@
+pub mod converter;
 pub mod model;
 pub mod touchforge;
 use anyhow::Result;
@@ -49,3 +50,4 @@ pub fn load_icp<P: AsRef<Path>>(path: P) -> Result<IcpProfile> {
 }
 pub use touchforge::*;
 pub use model::*;
+pub use converter::*;
