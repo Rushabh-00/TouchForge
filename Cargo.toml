@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "crates/touchforge-core",
+    "crates/touchforge-profile",
+    "crates/touchforge-cli",
+]
+resolver = "2"
