@@ -3,5 +3,6 @@ members = [
     "crates/touchforge-core",
     "crates/touchforge-profile",
     "crates/touchforge-cli",
+    "crates/touchforge-renderer",
 ]
 resolver = "2"
