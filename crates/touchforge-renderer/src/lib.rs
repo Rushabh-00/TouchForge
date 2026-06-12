@@ -1,6 +1,25 @@
 use eframe::egui;
 
-pub struct TouchForgeApp;
+#[derive(Clone)]
+struct CanvasControl {
+    name: String,
+    x: f32,
+    y: f32,
+    width: f32,
+    height: f32,
+}
+
+pub struct TouchForgeApp {
+    controls: Vec<CanvasControl>,
+}
+
+impl Default for TouchForgeApp {
+    fn default() -> Self {
+        Self {
+            controls: Vec::new(),
+        }
+    }
+}
 
 impl eframe::App for TouchForgeApp {
     fn update(
@@ -13,7 +32,7 @@ impl eframe::App for TouchForgeApp {
                 ui.heading("TouchForge");
 
                 if ui.button("New Profile").clicked() {
-                    println!("New Profile");
+                    self.controls.clear();
                 }
 
                 if ui.button("Open").clicked() {
@@ -38,35 +57,54 @@ impl eframe::App for TouchForgeApp {
                 ui.separator();
 
                 if ui.button("Button").clicked() {
-                    println!("Add Button");
+                    self.controls.push(CanvasControl {
+                        name: "Button".to_string(),
+                        x: 100.0,
+                        y: 100.0,
+                        width: 80.0,
+                        height: 80.0,
+                    });
                 }
 
                 if ui.button("Joystick").clicked() {
-                    println!("Add Joystick");
+                    self.controls.push(CanvasControl {
+                        name: "Joystick".to_string(),
+                        x: 200.0,
+                        y: 200.0,
+                        width: 120.0,
+                        height: 120.0,
+                    });
                 }
 
                 if ui.button("Swipe Area").clicked() {
-                    println!("Add Swipe Area");
+                    self.controls.push(CanvasControl {
+                        name: "Swipe Area".to_string(),
+                        x: 300.0,
+                        y: 150.0,
+                        width: 140.0,
+                        height: 100.0,
+                    });
                 }
 
                 if ui.button("Mouse Area").clicked() {
-                    println!("Add Mouse Area");
+                    self.controls.push(CanvasControl {
+                        name: "Mouse Area".to_string(),
+                        x: 450.0,
+                        y: 150.0,
+                        width: 140.0,
+                        height: 100.0,
+                    });
                 }
+
+                ui.separator();
+                ui.label(format!("Controls: {}", self.controls.len()));
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Canvas");
-
             ui.separator();
 
-            ui.label("TouchForge Editor");
-
-            ui.label("Profile editing canvas will appear here.");
-
-            ui.add_space(20.0);
-
             let available = ui.available_size();
-
             let (_id, rect) = ui.allocate_space(available);
 
             ui.painter().rect_stroke(
@@ -76,13 +114,33 @@ impl eframe::App for TouchForgeApp {
                 egui::StrokeKind::Middle,
             );
 
-            ui.painter().text(
-                rect.center(),
-                egui::Align2::CENTER_CENTER,
-                "Canvas",
-                egui::FontId::proportional(24.0),
-                egui::Color32::LIGHT_GRAY,
-            );
+            for control in &self.controls {
+                let control_rect = egui::Rect::from_min_size(
+                    rect.min + egui::vec2(control.x, control.y),
+                    egui::vec2(control.width, control.height),
+                );
+
+                ui.painter().rect_filled(
+                    control_rect,
+                    4.0,
+                    egui::Color32::from_gray(60),
+                );
+
+                ui.painter().rect_stroke(
+                    control_rect,
+                    4.0,
+                    egui::Stroke::new(2.0, egui::Color32::LIGHT_BLUE),
+                    egui::StrokeKind::Middle,
+                );
+
+                ui.painter().text(
+                    control_rect.center(),
+                    egui::Align2::CENTER_CENTER,
+                    &control.name,
+                    egui::FontId::proportional(16.0),
+                    egui::Color32::WHITE,
+                );
+            }
         });
     }
 }
@@ -97,7 +155,7 @@ pub fn run() {
     eframe::run_native(
         "TouchForge",
         options,
-        Box::new(|_| Ok(Box::new(TouchForgeApp))),
+        Box::new(|_| Ok(Box::new(TouchForgeApp::default()))),
     )
     .expect("failed to start TouchForge");
 }
