@@ -11,12 +11,14 @@ struct CanvasControl {
 
 pub struct TouchForgeApp {
     controls: Vec<CanvasControl>,
+    selected: Option<usize>,
 }
 
 impl Default for TouchForgeApp {
     fn default() -> Self {
         Self {
             controls: Vec::new(),
+            selected: None,
         }
     }
 }
@@ -27,12 +29,23 @@ impl eframe::App for TouchForgeApp {
         ctx: &egui::Context,
         _frame: &mut eframe::Frame,
     ) {
+        if ctx.input(|i| i.key_pressed(egui::Key::Delete)) {
+            if let Some(index) = self.selected {
+                if index < self.controls.len() {
+                    self.controls.remove(index);
+                }
+
+                self.selected = None;
+            }
+        }
+
         egui::TopBottomPanel::top("toolbar").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.heading("TouchForge");
 
                 if ui.button("New Profile").clicked() {
                     self.controls.clear();
+                    self.selected = None;
                 }
 
                 if ui.button("Open").clicked() {
@@ -98,6 +111,13 @@ impl eframe::App for TouchForgeApp {
 
                 ui.separator();
                 ui.label(format!("Controls: {}", self.controls.len()));
+
+                if let Some(index) = self.selected {
+                    if let Some(control) = self.controls.get(index) {
+                        ui.separator();
+                        ui.label(format!("Selected: {}", control.name));
+                    }
+                }
             });
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -105,20 +125,37 @@ impl eframe::App for TouchForgeApp {
             ui.separator();
 
             let available = ui.available_size();
-            let (_id, rect) = ui.allocate_space(available);
+            let (_id, canvas_rect) = ui.allocate_space(available);
 
             ui.painter().rect_stroke(
-                rect,
+                canvas_rect,
                 0.0,
                 egui::Stroke::new(2.0, egui::Color32::GRAY),
                 egui::StrokeKind::Middle,
             );
 
-            for control in &self.controls {
+            for (index, control) in self.controls.iter_mut().enumerate() {
                 let control_rect = egui::Rect::from_min_size(
-                    rect.min + egui::vec2(control.x, control.y),
+                    canvas_rect.min + egui::vec2(control.x, control.y),
                     egui::vec2(control.width, control.height),
                 );
+
+                let response = ui.interact(
+                    control_rect,
+                    egui::Id::new(("control", index)),
+                    egui::Sense::click_and_drag(),
+                );
+
+                if response.clicked() {
+                    self.selected = Some(index);
+                }
+
+                if response.dragged() {
+                    let delta = response.drag_delta();
+
+                    control.x += delta.x;
+                    control.y += delta.y;
+                }
 
                 ui.painter().rect_filled(
                     control_rect,
@@ -129,7 +166,18 @@ impl eframe::App for TouchForgeApp {
                 ui.painter().rect_stroke(
                     control_rect,
                     4.0,
-                    egui::Stroke::new(2.0, egui::Color32::LIGHT_BLUE),
+                    egui::Stroke::new(
+                        if self.selected == Some(index) {
+                            3.0
+                        } else {
+                            2.0
+                        },
+                        if self.selected == Some(index) {
+                            egui::Color32::YELLOW
+                        } else {
+                            egui::Color32::LIGHT_BLUE
+                        },
+                    ),
                     egui::StrokeKind::Middle,
                 );
 
