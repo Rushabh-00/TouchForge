@@ -1,4 +1,3 @@
-use anyhow::Result;
 use eframe::egui;
 
 pub struct TouchForgeApp;
@@ -15,7 +14,6 @@ impl eframe::App for TouchForgeApp {
             ui.separator();
 
             ui.label("TouchForge Renderer");
-
             ui.label("v0.2-alpha");
 
             if ui.button("Create Profile").clicked() {
@@ -37,14 +35,13 @@ impl eframe::App for TouchForgeApp {
     }
 }
 
-pub fn run() -> Result<()> {
+pub fn run() {
     let options = eframe::NativeOptions::default();
 
     eframe::run_native(
         "TouchForge",
         options,
         Box::new(|_| Ok(Box::new(TouchForgeApp))),
-    )?;
-
-    Ok(())
+    )
+    .expect("failed to start TouchForge");
 }
