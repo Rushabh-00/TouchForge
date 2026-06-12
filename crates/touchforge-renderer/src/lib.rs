@@ -147,6 +147,7 @@ impl eframe::App for TouchForgeApp {
 
 pub fn run() {
     let options = eframe::NativeOptions {
+        renderer: eframe::Renderer::Wgpu,
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1280.0, 720.0]),
         ..Default::default()
