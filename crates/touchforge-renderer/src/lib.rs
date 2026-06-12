@@ -1,49 +1,50 @@
 use anyhow::Result;
-use winit::{
-    application::ApplicationHandler,
-    event::WindowEvent,
-    event_loop::{ActiveEventLoop, EventLoop},
-    window::{Window, WindowAttributes},
-};
+use eframe::egui;
 
-pub struct Renderer {
-    window: Option<Window>,
-}
+pub struct TouchForgeApp;
 
-impl Renderer {
-    pub fn run() -> Result<()> {
-        let event_loop = EventLoop::new()?;
-
-        let mut app = Renderer {
-            window: None,
-        };
-
-        event_loop.run_app(&mut app)?;
-
-        Ok(())
-    }
-}
-
-impl ApplicationHandler for Renderer {
-    fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        let window = event_loop
-            .create_window(
-                WindowAttributes::default()
-                    .with_title("TouchForge"),
-            )
-            .unwrap();
-
-        self.window = Some(window);
-    }
-
-    fn window_event(
+impl eframe::App for TouchForgeApp {
+    fn update(
         &mut self,
-        event_loop: &ActiveEventLoop,
-        _id: winit::window::WindowId,
-        event: WindowEvent,
+        ctx: &egui::Context,
+        _frame: &mut eframe::Frame,
     ) {
-        if let WindowEvent::CloseRequested = event {
-            event_loop.exit();
-        }
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("TouchForge");
+
+            ui.separator();
+
+            ui.label("TouchForge Renderer");
+
+            ui.label("v0.2-alpha");
+
+            if ui.button("Create Profile").clicked() {
+                println!("Create Profile");
+            }
+
+            if ui.button("Open Profile").clicked() {
+                println!("Open Profile");
+            }
+
+            if ui.button("Import ICP").clicked() {
+                println!("Import ICP");
+            }
+
+            if ui.button("Export Profile").clicked() {
+                println!("Export Profile");
+            }
+        });
     }
+}
+
+pub fn run() -> Result<()> {
+    let options = eframe::NativeOptions::default();
+
+    eframe::run_native(
+        "TouchForge",
+        options,
+        Box::new(|_| Ok(Box::new(TouchForgeApp))),
+    )?;
+
+    Ok(())
 }
