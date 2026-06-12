@@ -45,6 +45,7 @@ jobs:
           New-Item -ItemType Directory -Force dist | Out-Null
 
           Copy-Item target/${{ matrix.target }}/release/touchforge-cli.exe dist/
+          Copy-Item target/${{ matrix.target }}/release/touchforge-renderer.exe dist/
 
           Compress-Archive `
             -Path dist/* `
@@ -56,6 +57,7 @@ jobs:
         run: |
           mkdir -p dist
           cp target/${{ matrix.target }}/release/touchforge-cli dist/
+          cp target/${{ matrix.target }}/release/touchforge-renderer dist/
           tar -czf ${{ matrix.archive }} dist
 
       - name: Upload Release
