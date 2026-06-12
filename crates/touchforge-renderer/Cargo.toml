@@ -9,5 +9,5 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
-eframe = { version = "0.32", features = ["wgpu", "glow"] }
+eframe = { version = "0.32", features = ["wgpu"] }
 egui = "0.32"
