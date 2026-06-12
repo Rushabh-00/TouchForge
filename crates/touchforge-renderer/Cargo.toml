@@ -3,6 +3,10 @@ name = "touchforge-renderer"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "touchforge-renderer"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1"
 eframe = "0.32"
