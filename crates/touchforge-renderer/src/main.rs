@@ -1,3 +1,3 @@
-fn main() -> anyhow::Result<()> {
-    touchforge_renderer::run()
+fn main() {
+    touchforge_renderer::run();
 }
