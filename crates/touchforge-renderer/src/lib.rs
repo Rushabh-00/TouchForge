@@ -2,7 +2,12 @@ use eframe::egui;
 
 const RESIZE_HANDLE_SIZE: f32 = 16.0;
 
-#[derive(Clone, PartialEq)]
+#[derive(
+    Clone,
+    PartialEq,
+    serde::Serialize,
+    serde::Deserialize
+)]
 enum ControlType {
     Button,
     Joystick,
@@ -10,7 +15,11 @@ enum ControlType {
     MouseArea,
 }
 
-#[derive(Clone)]
+#[derive(
+    Clone,
+    serde::Serialize,
+    serde::Deserialize
+)]
 struct CanvasControl {
     control_type: ControlType,
     name: String,
