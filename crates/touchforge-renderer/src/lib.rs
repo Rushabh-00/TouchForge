@@ -7,6 +7,10 @@ struct CanvasControl {
     y: f32,
     width: f32,
     height: f32,
+    opacity: f32,
+    visible: bool,
+    lock_position: bool,
+    lock_size: bool,
 }
 
 pub struct TouchForgeApp {
@@ -24,11 +28,7 @@ impl Default for TouchForgeApp {
 }
 
 impl eframe::App for TouchForgeApp {
-    fn update(
-        &mut self,
-        ctx: &egui::Context,
-        _frame: &mut eframe::Frame,
-    ) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if ctx.input(|i| i.key_pressed(egui::Key::Delete)) {
             if let Some(index) = self.selected {
                 if index < self.controls.len() {
@@ -46,169 +46,80 @@ impl eframe::App for TouchForgeApp {
                     self.controls.clear();
                     self.selected = None;
                 }
-
-                if ui.button("Open").clicked() {
-                    println!("Open");
-                }
-
-                if ui.button("Import ICP").clicked() {
-                    println!("Import ICP");
-                }
-
-                if ui.button("Export").clicked() {
-                    println!("Export");
-                }
             });
         });
 
-        egui::SidePanel::left("controls")
-            .resizable(true)
-            .show(ctx, |ui| {
-                ui.heading("Controls");
+        egui::SidePanel::left("controls").show(ctx, |ui| {
+            ui.heading("Controls");
 
-                ui.separator();
+            let mut add_control = |name: &str, x: f32, y: f32, w: f32, h: f32| {
+                self.controls.push(CanvasControl {
+                    name: name.to_string(),
+                    x, y, width: w, height: h,
+                    opacity: 1.0,
+                    visible: true,
+                    lock_position: false,
+                    lock_size: false,
+                });
+            };
 
-                if ui.button("Button").clicked() {
-                    self.controls.push(CanvasControl {
-                        name: "Button".to_string(),
-                        x: 100.0,
-                        y: 100.0,
-                        width: 80.0,
-                        height: 80.0,
+            if ui.button("Button").clicked() { add_control("Button",100.0,100.0,80.0,80.0); }
+            if ui.button("Joystick").clicked() { add_control("Joystick",200.0,200.0,120.0,120.0); }
+            if ui.button("Swipe Area").clicked() { add_control("Swipe Area",300.0,150.0,140.0,100.0); }
+            if ui.button("Mouse Area").clicked() { add_control("Mouse Area",450.0,150.0,140.0,100.0); }
+        });
+
+        egui::SidePanel::right("properties").default_width(260.0).show(ctx, |ui| {
+            ui.heading("Properties");
+
+            if let Some(index) = self.selected {
+                if let Some(control) = self.controls.get_mut(index) {
+                    ui.text_edit_singleline(&mut control.name);
+
+                    ui.label("X");
+                    ui.add(egui::DragValue::new(&mut control.x));
+                    ui.add(egui::Slider::new(&mut control.x, 0.0..=3000.0));
+
+                    ui.label("Y");
+                    ui.add(egui::DragValue::new(&mut control.y));
+                    ui.add(egui::Slider::new(&mut control.y, 0.0..=3000.0));
+
+                    ui.label("Width");
+                    ui.add(egui::DragValue::new(&mut control.width));
+                    ui.add(egui::Slider::new(&mut control.width, 10.0..=1000.0));
+
+                    ui.label("Height");
+                    ui.add(egui::DragValue::new(&mut control.height));
+                    ui.add(egui::Slider::new(&mut control.height, 10.0..=1000.0));
+
+                    ui.collapsing("Advanced", |ui| {
+                        ui.add(egui::Slider::new(&mut control.opacity, 0.0..=1.0).text("Opacity"));
+                        ui.checkbox(&mut control.visible, "Visible");
+                        ui.checkbox(&mut control.lock_position, "Lock Position");
+                        ui.checkbox(&mut control.lock_size, "Lock Size");
                     });
-                }
 
-                if ui.button("Joystick").clicked() {
-                    self.controls.push(CanvasControl {
-                        name: "Joystick".to_string(),
-                        x: 200.0,
-                        y: 200.0,
-                        width: 120.0,
-                        height: 120.0,
-                    });
-                }
-
-                if ui.button("Swipe Area").clicked() {
-                    self.controls.push(CanvasControl {
-                        name: "Swipe Area".to_string(),
-                        x: 300.0,
-                        y: 150.0,
-                        width: 140.0,
-                        height: 100.0,
-                    });
-                }
-
-                if ui.button("Mouse Area").clicked() {
-                    self.controls.push(CanvasControl {
-                        name: "Mouse Area".to_string(),
-                        x: 450.0,
-                        y: 150.0,
-                        width: 140.0,
-                        height: 100.0,
-                    });
-                }
-
-                ui.separator();
-                ui.label(format!("Controls: {}", self.controls.len()));
-
-                if let Some(index) = self.selected {
-                    if let Some(control) = self.controls.get(index) {
-                        ui.separator();
-                        ui.label(format!("Selected: {}", control.name));
+                    if ui.button("Delete Control").clicked() {
+                        self.controls.remove(index);
+                        self.selected = None;
                     }
                 }
-            });
-
-        egui::SidePanel::right("properties")
-            .resizable(true)
-            .default_width(250.0)
-            .show(ctx, |ui| {
-                ui.heading("Properties");
-
-                if let Some(index) = self.selected {
-                    if let Some(control) = self.controls.get_mut(index) {
-                        ui.separator();
-
-                        ui.label("Name");
-                        ui.text_edit_singleline(&mut control.name);
-
-                        ui.separator();
-
-                        ui.label("Position");
-
-                        ui.horizontal(|ui| {
-                            ui.label("X");
-                            ui.add(
-                                egui::DragValue::new(&mut control.x)
-                                    .speed(1.0),
-                            );
-                        });
-
-                        ui.horizontal(|ui| {
-                            ui.label("Y");
-                            ui.add(
-                                egui::DragValue::new(&mut control.y)
-                                    .speed(1.0),
-                            );
-                        });
-
-                        ui.separator();
-
-                        ui.label("Size");
-
-                        ui.horizontal(|ui| {
-                            ui.label("Width");
-                            ui.add(
-                                egui::DragValue::new(&mut control.width)
-                                    .speed(1.0)
-                                    .range(10.0..=2000.0),
-                            );
-                        });
-
-                        ui.horizontal(|ui| {
-                            ui.label("Height");
-                            ui.add(
-                                egui::DragValue::new(&mut control.height)
-                                    .speed(1.0)
-                                    .range(10.0..=2000.0),
-                            );
-                        });
-
-                        ui.separator();
-
-                        if ui.button("Delete Control").clicked() {
-                            self.controls.remove(index);
-                            self.selected = None;
-                        }
-                    }
-                } else {
-                    ui.separator();
-                    ui.label("Select a control");
-                }
-            });
+            }
+        });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Canvas");
-            ui.separator();
-
-            let available = ui.available_size();
-            let (_id, canvas_rect) = ui.allocate_space(available);
-
-            ui.painter().rect_stroke(
-                canvas_rect,
-                0.0,
-                egui::Stroke::new(2.0, egui::Color32::GRAY),
-                egui::StrokeKind::Middle,
-            );
+            let (_id, canvas_rect) = ui.allocate_space(ui.available_size());
 
             for (index, control) in self.controls.iter_mut().enumerate() {
-                let control_rect = egui::Rect::from_min_size(
+                if !control.visible { continue; }
+
+                let rect = egui::Rect::from_min_size(
                     canvas_rect.min + egui::vec2(control.x, control.y),
                     egui::vec2(control.width, control.height),
                 );
 
                 let response = ui.interact(
-                    control_rect,
+                    rect,
                     egui::Id::new(("control", index)),
                     egui::Sense::click_and_drag(),
                 );
@@ -217,39 +128,32 @@ impl eframe::App for TouchForgeApp {
                     self.selected = Some(index);
                 }
 
-                if response.dragged() {
-                    let delta = response.drag_delta();
-
-                    control.x += delta.x;
-                    control.y += delta.y;
+                if response.dragged() && !control.lock_position {
+                    let d = response.drag_delta();
+                    control.x += d.x;
+                    control.y += d.y;
                 }
 
+                let alpha = (control.opacity * 255.0) as u8;
+
                 ui.painter().rect_filled(
-                    control_rect,
-                    4.0,
-                    egui::Color32::from_gray(60),
+                    rect,
+                    6.0,
+                    egui::Color32::from_rgba_unmultiplied(60,60,60,alpha),
                 );
 
                 ui.painter().rect_stroke(
-                    control_rect,
-                    4.0,
+                    rect,
+                    6.0,
                     egui::Stroke::new(
-                        if self.selected == Some(index) {
-                            3.0
-                        } else {
-                            2.0
-                        },
-                        if self.selected == Some(index) {
-                            egui::Color32::YELLOW
-                        } else {
-                            egui::Color32::LIGHT_BLUE
-                        },
+                        if self.selected == Some(index) { 3.0 } else { 2.0 },
+                        if self.selected == Some(index) { egui::Color32::YELLOW } else { egui::Color32::LIGHT_BLUE }
                     ),
                     egui::StrokeKind::Middle,
                 );
 
                 ui.painter().text(
-                    control_rect.center(),
+                    rect.center(),
                     egui::Align2::CENTER_CENTER,
                     &control.name,
                     egui::FontId::proportional(16.0),
@@ -263,8 +167,7 @@ impl eframe::App for TouchForgeApp {
 pub fn run() {
     let options = eframe::NativeOptions {
         renderer: eframe::Renderer::Wgpu,
-        viewport: egui::ViewportBuilder::default()
-            .with_inner_size([1280.0, 720.0]),
+        viewport: egui::ViewportBuilder::default().with_inner_size([1280.0, 720.0]),
         ..Default::default()
     };
 
@@ -272,6 +175,5 @@ pub fn run() {
         "TouchForge",
         options,
         Box::new(|_| Ok(Box::new(TouchForgeApp::default()))),
-    )
-    .expect("failed to start TouchForge");
+    ).expect("failed to start TouchForge");
 }
