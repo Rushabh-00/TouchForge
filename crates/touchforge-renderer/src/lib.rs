@@ -21,7 +21,6 @@ enum ControlType {
 struct TouchForgeProfile {
     controls: Vec<CanvasControl>,
 }
-
 #[derive(
     Clone,
     serde::Serialize,
