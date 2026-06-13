@@ -14,6 +14,13 @@ enum ControlType {
     SwipeArea,
     MouseArea,
 }
+#[derive(
+    serde::Serialize,
+    serde::Deserialize
+)]
+struct TouchForgeProfile {
+    controls: Vec<CanvasControl>,
+}
 
 #[derive(
     Clone,
