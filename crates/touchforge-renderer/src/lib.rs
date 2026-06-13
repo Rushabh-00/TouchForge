@@ -34,7 +34,6 @@ impl eframe::App for TouchForgeApp {
                 if index < self.controls.len() {
                     self.controls.remove(index);
                 }
-
                 self.selected = None;
             }
         }
@@ -117,6 +116,74 @@ impl eframe::App for TouchForgeApp {
                         ui.separator();
                         ui.label(format!("Selected: {}", control.name));
                     }
+                }
+            });
+
+        egui::SidePanel::right("properties")
+            .resizable(true)
+            .default_width(250.0)
+            .show(ctx, |ui| {
+                ui.heading("Properties");
+
+                if let Some(index) = self.selected {
+                    if let Some(control) = self.controls.get_mut(index) {
+                        ui.separator();
+
+                        ui.label("Name");
+                        ui.text_edit_singleline(&mut control.name);
+
+                        ui.separator();
+
+                        ui.label("Position");
+
+                        ui.horizontal(|ui| {
+                            ui.label("X");
+                            ui.add(
+                                egui::DragValue::new(&mut control.x)
+                                    .speed(1.0),
+                            );
+                        });
+
+                        ui.horizontal(|ui| {
+                            ui.label("Y");
+                            ui.add(
+                                egui::DragValue::new(&mut control.y)
+                                    .speed(1.0),
+                            );
+                        });
+
+                        ui.separator();
+
+                        ui.label("Size");
+
+                        ui.horizontal(|ui| {
+                            ui.label("Width");
+                            ui.add(
+                                egui::DragValue::new(&mut control.width)
+                                    .speed(1.0)
+                                    .range(10.0..=2000.0),
+                            );
+                        });
+
+                        ui.horizontal(|ui| {
+                            ui.label("Height");
+                            ui.add(
+                                egui::DragValue::new(&mut control.height)
+                                    .speed(1.0)
+                                    .range(10.0..=2000.0),
+                            );
+                        });
+
+                        ui.separator();
+
+                        if ui.button("Delete Control").clicked() {
+                            self.controls.remove(index);
+                            self.selected = None;
+                        }
+                    }
+                } else {
+                    ui.separator();
+                    ui.label("Select a control");
                 }
             });
 
