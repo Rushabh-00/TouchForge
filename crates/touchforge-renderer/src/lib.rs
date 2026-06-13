@@ -1,7 +1,18 @@
 use eframe::egui;
 
+const RESIZE_HANDLE_SIZE: f32 = 16.0;
+
+#[derive(Clone, PartialEq)]
+enum ControlType {
+    Button,
+    Joystick,
+    SwipeArea,
+    MouseArea,
+}
+
 #[derive(Clone)]
 struct CanvasControl {
+    control_type: ControlType,
     name: String,
     x: f32,
     y: f32,
@@ -59,31 +70,54 @@ impl eframe::App for TouchForgeApp {
             egui::SidePanel::left("controls").show(ctx, |ui| {
                 ui.heading("Controls");
 
-                let mut add_control = |name: &str, x: f32, y: f32, w: f32, h: f32| {
-                    self.controls.push(CanvasControl {
-                        name: name.to_string(),
-                        x,
-                        y,
-                        width: w,
-                        height: h,
-                        opacity: 1.0,
-                        visible: true,
-                        lock_position: false,
-                        lock_size: false,
-                    });
-                };
+                let mut add_control =
+                    |name: &str, control_type: ControlType, x: f32, y: f32, w: f32, h: f32| {
+                        self.controls.push(CanvasControl {
+                            control_type,
+                            name: name.to_string(),
+                            x,
+                            y,
+                            width: w,
+                            height: h,
+                            opacity: 1.0,
+                            visible: true,
+                            lock_position: false,
+                            lock_size: false,
+                        });
+                    };
 
                 if ui.button("Button").clicked() {
-                    add_control("Button", 100.0, 100.0, 80.0, 80.0);
+                    add_control("Button", ControlType::Button, 100.0, 100.0, 80.0, 80.0);
                 }
                 if ui.button("Joystick").clicked() {
-                    add_control("Joystick", 200.0, 200.0, 120.0, 120.0);
+                    add_control(
+                        "Joystick",
+                        ControlType::Joystick,
+                        200.0,
+                        200.0,
+                        120.0,
+                        120.0,
+                    );
                 }
                 if ui.button("Swipe Area").clicked() {
-                    add_control("Swipe Area", 300.0, 150.0, 140.0, 100.0);
+                    add_control(
+                        "Swipe Area",
+                        ControlType::SwipeArea,
+                        300.0,
+                        150.0,
+                        140.0,
+                        100.0,
+                    );
                 }
                 if ui.button("Mouse Area").clicked() {
-                    add_control("Mouse Area", 450.0, 150.0, 140.0, 100.0);
+                    add_control(
+                        "Mouse Area",
+                        ControlType::MouseArea,
+                        450.0,
+                        150.0,
+                        140.0,
+                        100.0,
+                    );
                 }
             });
         }
@@ -157,9 +191,20 @@ impl eframe::App for TouchForgeApp {
                     egui::vec2(control.width, control.height),
                 );
 
+                let resize_rect = egui::Rect::from_center_size(
+                    rect.right_bottom(),
+                    egui::vec2(RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE),
+                );
+
                 let response = ui.interact(
                     rect,
                     egui::Id::new(("control", index)),
+                    egui::Sense::click_and_drag(),
+                );
+
+                let resize_response = ui.interact(
+                    resize_rect,
+                    egui::Id::new(("resize", index)),
                     egui::Sense::click_and_drag(),
                 );
 
@@ -178,13 +223,65 @@ impl eframe::App for TouchForgeApp {
                     control.y += d.y * 0.1;
                 }
 
+                if resize_response.dragged() && !control.lock_size {
+                    let delta = resize_response.drag_delta();
+
+                    control.width = (control.width + delta.x * 0.1).max(20.0);
+
+                    control.height = (control.height + delta.y * 0.1).max(20.0);
+                }
+
                 let alpha = (control.opacity * 255.0) as u8;
 
-                ui.painter().rect_filled(
-                    rect,
-                    6.0,
-                    egui::Color32::from_rgba_unmultiplied(60, 60, 60, alpha),
-                );
+                match control.control_type {
+                    ControlType::Button => {
+                        ui.painter().rect_filled(
+                            rect,
+                            12.0,
+                            egui::Color32::from_rgba_unmultiplied(80, 120, 220, alpha),
+                        );
+                    }
+
+                    ControlType::Joystick => {
+                        ui.painter().circle_filled(
+                            rect.center(),
+                            rect.width().min(rect.height()) / 2.0,
+                            egui::Color32::from_rgba_unmultiplied(80, 180, 120, alpha),
+                        );
+
+                        ui.painter().circle_filled(
+                            rect.center(),
+                            rect.width().min(rect.height()) / 4.0,
+                            egui::Color32::WHITE,
+                        );
+                    }
+
+                    ControlType::SwipeArea => {
+                        ui.painter().rect_filled(
+                            rect,
+                            4.0,
+                            egui::Color32::from_rgba_unmultiplied(220, 180, 60, alpha),
+                        );
+                    }
+
+                    ControlType::MouseArea => {
+                        ui.painter().rect_filled(
+                            rect,
+                            4.0,
+                            egui::Color32::from_rgba_unmultiplied(180, 80, 220, alpha),
+                        );
+
+                        ui.painter().line_segment(
+                            [rect.left_center(), rect.right_center()],
+                            egui::Stroke::new(2.0, egui::Color32::WHITE),
+                        );
+
+                        ui.painter().line_segment(
+                            [rect.center_top(), rect.center_bottom()],
+                            egui::Stroke::new(2.0, egui::Color32::WHITE),
+                        );
+                    }
+                }
 
                 ui.painter().rect_stroke(
                     rect,
@@ -207,6 +304,14 @@ impl eframe::App for TouchForgeApp {
                     egui::FontId::proportional(16.0),
                     egui::Color32::WHITE,
                 );
+
+                if self.selected == Some(index) {
+                    ui.painter().circle_filled(
+                        resize_rect.center(),
+                        RESIZE_HANDLE_SIZE / 2.0,
+                        egui::Color32::YELLOW,
+                    );
+                }
             }
         });
     }
