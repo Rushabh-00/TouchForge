@@ -16,6 +16,7 @@ struct CanvasControl {
 pub struct TouchForgeApp {
     controls: Vec<CanvasControl>,
     selected: Option<usize>,
+    fullscreen_editor: bool,
 }
 
 impl Default for TouchForgeApp {
@@ -23,6 +24,7 @@ impl Default for TouchForgeApp {
         Self {
             controls: Vec::new(),
             selected: None,
+            fullscreen_editor: false,
         }
     }
 }
@@ -46,84 +48,103 @@ impl eframe::App for TouchForgeApp {
                     self.controls.clear();
                     self.selected = None;
                 }
-            });
-        });
 
-        egui::SidePanel::left("controls").show(ctx, |ui| {
-            ui.heading("Controls");
-
-            let mut add_control = |name: &str, x: f32, y: f32, w: f32, h: f32| {
-                self.controls.push(CanvasControl {
-                    name: name.to_string(),
-                    x,
-                    y,
-                    width: w,
-                    height: h,
-                    opacity: 1.0,
-                    visible: true,
-                    lock_position: false,
-                    lock_size: false,
-                });
-            };
-
-            if ui.button("Button").clicked() {
-                add_control("Button", 100.0, 100.0, 80.0, 80.0);
-            }
-            if ui.button("Joystick").clicked() {
-                add_control("Joystick", 200.0, 200.0, 120.0, 120.0);
-            }
-            if ui.button("Swipe Area").clicked() {
-                add_control("Swipe Area", 300.0, 150.0, 140.0, 100.0);
-            }
-            if ui.button("Mouse Area").clicked() {
-                add_control("Mouse Area", 450.0, 150.0, 140.0, 100.0);
-            }
-        });
-
-        egui::SidePanel::right("properties")
-            .default_width(260.0)
-            .show(ctx, |ui| {
-                ui.heading("Properties");
-
-                if let Some(index) = self.selected {
-                    if let Some(control) = self.controls.get_mut(index) {
-                        ui.text_edit_singleline(&mut control.name);
-
-                        ui.label("X");
-                        ui.add(egui::DragValue::new(&mut control.x));
-                        ui.add(egui::Slider::new(&mut control.x, 0.0..=3000.0));
-
-                        ui.label("Y");
-                        ui.add(egui::DragValue::new(&mut control.y));
-                        ui.add(egui::Slider::new(&mut control.y, 0.0..=3000.0));
-
-                        ui.label("Width");
-                        ui.add(egui::DragValue::new(&mut control.width));
-                        ui.add(egui::Slider::new(&mut control.width, 10.0..=1000.0));
-
-                        ui.label("Height");
-                        ui.add(egui::DragValue::new(&mut control.height));
-                        ui.add(egui::Slider::new(&mut control.height, 10.0..=1000.0));
-
-                        ui.collapsing("Advanced", |ui| {
-                            ui.add(
-                                egui::Slider::new(&mut control.opacity, 0.0..=1.0)
-                                    .text("Opacity"),
-                            );
-                            ui.checkbox(&mut control.visible, "Visible");
-                            ui.checkbox(&mut control.lock_position, "Lock Position");
-                            ui.checkbox(&mut control.lock_size, "Lock Size");
-                        });
-
-                        if ui.button("Delete Control").clicked() {
-                            self.controls.remove(index);
-                            self.selected = None;
-                        }
-                    }
+                if ui.button("Fullscreen").clicked() {
+                    self.fullscreen_editor = !self.fullscreen_editor;
                 }
             });
+        });
+
+        if !self.fullscreen_editor {
+            egui::SidePanel::left("controls").show(ctx, |ui| {
+                ui.heading("Controls");
+
+                let mut add_control = |name: &str, x: f32, y: f32, w: f32, h: f32| {
+                    self.controls.push(CanvasControl {
+                        name: name.to_string(),
+                        x,
+                        y,
+                        width: w,
+                        height: h,
+                        opacity: 1.0,
+                        visible: true,
+                        lock_position: false,
+                        lock_size: false,
+                    });
+                };
+
+                if ui.button("Button").clicked() {
+                    add_control("Button", 100.0, 100.0, 80.0, 80.0);
+                }
+                if ui.button("Joystick").clicked() {
+                    add_control("Joystick", 200.0, 200.0, 120.0, 120.0);
+                }
+                if ui.button("Swipe Area").clicked() {
+                    add_control("Swipe Area", 300.0, 150.0, 140.0, 100.0);
+                }
+                if ui.button("Mouse Area").clicked() {
+                    add_control("Mouse Area", 450.0, 150.0, 140.0, 100.0);
+                }
+            });
+        }
+
+        if !self.fullscreen_editor {
+            egui::SidePanel::right("properties")
+                .default_width(260.0)
+                .show(ctx, |ui| {
+                    ui.heading("Properties");
+
+                    if let Some(index) = self.selected {
+                        if let Some(control) = self.controls.get_mut(index) {
+                            ui.text_edit_singleline(&mut control.name);
+
+                            ui.label("X");
+                            ui.add(egui::DragValue::new(&mut control.x));
+                            ui.add(egui::Slider::new(&mut control.x, 0.0..=3000.0));
+
+                            ui.label("Y");
+                            ui.add(egui::DragValue::new(&mut control.y));
+                            ui.add(egui::Slider::new(&mut control.y, 0.0..=3000.0));
+
+                            ui.label("Width");
+                            ui.add(egui::DragValue::new(&mut control.width));
+                            ui.add(egui::Slider::new(&mut control.width, 10.0..=1000.0));
+
+                            ui.label("Height");
+                            ui.add(egui::DragValue::new(&mut control.height));
+                            ui.add(egui::Slider::new(&mut control.height, 10.0..=1000.0));
+
+                            ui.collapsing("Advanced", |ui| {
+                                ui.add(
+                                    egui::Slider::new(&mut control.opacity, 0.0..=1.0)
+                                        .text("Opacity"),
+                                );
+                                ui.checkbox(&mut control.visible, "Visible");
+                                ui.checkbox(&mut control.lock_position, "Lock Position");
+                                ui.checkbox(&mut control.lock_size, "Lock Size");
+                            });
+
+                            if ui.button("Delete Control").clicked() {
+                                self.controls.remove(index);
+                                self.selected = None;
+                            }
+                        }
+                    }
+                });
+        }
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            if self.fullscreen_editor {
+                egui::Window::new("Editor")
+                    .title_bar(false)
+                    .resizable(false)
+                    .show(ctx, |ui| {
+                        if ui.button("Exit Fullscreen").clicked() {
+                            self.fullscreen_editor = false;
+                        }
+                    });
+            }
+
             let (_id, canvas_rect) = ui.allocate_space(ui.available_size());
 
             for (index, control) in self.controls.iter_mut().enumerate() {
