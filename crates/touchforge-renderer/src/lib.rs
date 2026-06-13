@@ -129,9 +129,16 @@ impl eframe::App for TouchForgeApp {
                 }
 
                 if response.dragged() && !control.lock_position {
-                    let d = response.drag_delta();
-                    control.x += d.x;
-                    control.y += d.y;
+                    if response.dragged() && !control.lock_position {
+    let d = response.drag_delta();
+
+    if response.drag_started() {
+        // optional future hook
+    }
+
+    control.x += d.x * 0.1;
+    control.y += d.y * 0.1;
+}
                 }
 
                 let alpha = (control.opacity * 255.0) as u8;
